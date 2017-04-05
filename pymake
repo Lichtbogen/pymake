@@ -1,0 +1,28 @@
+#!/bin/python
+
+""" PyMake Makefile generator """
+
+import json
+from mkfile import Makefile
+
+# Try to load json config file
+try:
+    with open("build.json") as build_json:
+        cfg = json.load(build_json)
+except IOError:
+    cfg = None
+
+make = Makefile(cfg)
+make.scan()
+
+if len(make.source) == 0:
+    print "Fatal: No source files were found"
+    exit(128)
+
+make.build()
+make.write("Makefile")
+
+if cfg == None:
+    cfg = make.get_properties()
+    with open("build.json", "wt") as build_json:
+        build_json.write(json.dumps(cfg, sort_keys=True, indent=4, separators=(',', ': ')))
