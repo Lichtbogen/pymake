@@ -37,6 +37,8 @@ class Makefile(object):
                 self.pflags = src['pflags']
             if 'dflags' in src.keys():
                 self.dflags = src['dflags']
+            if 'source' in src.keys():
+                self.source = src['source']
 
     def get_properties(self):
         """ Returns the Makefile properties as an dictionary """
@@ -53,6 +55,7 @@ class Makefile(object):
             pdc.update({"dflags":self.dflags})
         if self.pflags != "":
             pdc.update({"pflags":self.pflags})
+        pdc.update({"source":self.source})
         return pdc
 
     def add_header(self):
@@ -77,12 +80,11 @@ class Makefile(object):
 
     def get_linker_statement(self):
         """ Gets the final linker statement """
-        line = "$(CC) $(LFLAGS) "
-        if self.cflags != "":
-            line += "$(CFLAGS) "
+        line = "$(CC) $(OBJ) -o $(NAME)"
+        if self.lflags != "":
+            line += " $(LFLAGS)"
         if self.pflags != "":
-            line += "$(PFLAGS) "
-        line += "$(OBJ) -o $(NAME)"
+            line += " $(PFLAGS)"
         return line
 
     def get_obj_name(self, fname):
@@ -106,7 +108,7 @@ class Makefile(object):
                 line += '\\'
                 self.lines.append(line)
                 line = '\t'
-        self.lines.append(line)
+        self.lines.append(line[0:len(line)-1])
         self.lines.append("")
 
     def add_all_target(self):
