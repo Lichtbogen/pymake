@@ -41,7 +41,7 @@ class Makefile(object):
             if 'source' in src.keys():
                 self.source = src['source']
             if 'libs' in src.keys():
-                self.source = src['libs']
+                self.libs = src['libs']
 
     def get_properties(self):
         """ Returns the Makefile properties as an dictionary """
