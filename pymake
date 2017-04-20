@@ -9,7 +9,7 @@ from optparse import OptionParser
 # Parse command line arguments
 cmdLine = OptionParser()
 cmdLine.add_option("-s", "--scan", dest="do_scan", default=False, action="store_true", help="Scan directory for input files")
-cmdLine.add_option("-r", "--recursive", dest="scan_recursive", default=False, action="store_true", help="Scan directory recursive (used together with -s")
+cmdLine.add_option("-r", "--recursive", dest="scan_recursive", default=False, action="store_true", help="Scan directory recursive (used together with -s)")
 options, args = cmdLine.parse_args()
 
 # Try to load json config file
