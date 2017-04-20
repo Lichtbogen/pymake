@@ -12,7 +12,7 @@ class Makefile(object):
         self.lines = []
         self.source = []
         self.compiler = "g++"
-        self.libs = ""
+        self.libs = []
         self.cflags = "-Wall"
         self.lflags = ""
         self.oflags = "-DNDEBUG -O2"
@@ -80,7 +80,7 @@ class Makefile(object):
 
     def get_linker_statement(self):
         """ Gets the final linker statement """
-        if self.libs != "":
+        if len(self.libs) > 0:
             line = "$(CC) $(LF) $(OBJ) -o $(NAME) $(LIBS)"
         else:
             line = "$(CC) $(LF) $(OBJ) -o $(NAME)"
@@ -88,6 +88,7 @@ class Makefile(object):
 
     def get_obj_name(self, fname):
         """ Returns the object name of source file """
+        fname = os.path.basename(fname)
         if fname.endswith(".c"):
             fname = fname.replace(".c", ".o")
         elif fname.endswith(".cpp"):
@@ -95,6 +96,13 @@ class Makefile(object):
         if self.objpath != "":
             fname = self.objpath + '/' + fname
         return fname
+
+    def get_libs(self):
+        """ Returns the library objects as command line argument for the compiler """
+        result = ""
+        for lib in self.libs:
+            result += "-l%s " % lib
+        return result[0:len(result)-1]
 
     def add_objects(self):
         """ Adds the list of objects to compile """
@@ -167,16 +175,25 @@ class Makefile(object):
             self.lines.append("OFLAGS = %s" % self.oflags)
         if self.pflags != "":
             self.lines.append("PFLAGS = %s" % self.pflags)
+        if len(self.libs) > 0:
+            self.lines.append("LIBS   = %s" % self.get_libs())
         self.lines.append("")
 
     def __str__(self):
         return '\n'.join(self.lines)
 
-    def scan(self, fdir='.'):
+    def scan(self, root='.', recursive=False):
         """ Scans the given directory for source files """
-        for fname in os.listdir(fdir):
-            if fname.endswith(".c") or fname.endswith(".cpp"):
-                self.source.append(fname)
+        if recursive:
+            for path, subdirs, files in os.walk(root):
+                for name in files:
+                    fname = os.path.join(path, name)
+                    if fname.endswith(".c") or fname.endswith(".cpp"):
+                        self.source.append(fname)
+        else:
+            for fname in os.listdir(root):
+                if fname.endswith(".c") or fname.endswith(".cpp"):
+                    self.source.append(fname)
 
     def write(self, fname):
         """ Writes the current content to the output file """

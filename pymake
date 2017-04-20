@@ -9,6 +9,7 @@ from optparse import OptionParser
 # Parse command line arguments
 cmdLine = OptionParser()
 cmdLine.add_option("-s", "--scan", dest="do_scan", default=False, action="store_true", help="Scan directory for input files")
+cmdLine.add_option("-r", "--recursive", dest="scan_recursive", default=False, action="store_true", help="Scan directory recursive (used together with -s")
 options, args = cmdLine.parse_args()
 
 # Try to load json config file
@@ -21,7 +22,7 @@ except IOError:
 make = Makefile(cfg)
 if len(make.source) == 0 or options.do_scan:
     make.source = []
-    make.scan()
+    make.scan(recursive=options.scan_recursive)
 
 if len(make.source) == 0:
     print "Fatal: No source files were found"
