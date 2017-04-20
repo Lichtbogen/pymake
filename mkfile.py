@@ -12,11 +12,12 @@ class Makefile(object):
         self.lines = []
         self.source = []
         self.compiler = "g++"
+        self.libs = ""
         self.cflags = "-Wall"
         self.lflags = ""
-        self.oflags = "-O2"
+        self.oflags = "-DNDEBUG -O2"
         self.pflags = ""
-        self.dflags = "-DDEBUG -g"
+        self.dflags = "-DDEBUG"
         self.objpath = ""
         self.name = "prog"
         self.preset = "Default GCC"
@@ -39,6 +40,8 @@ class Makefile(object):
                 self.dflags = src['dflags']
             if 'source' in src.keys():
                 self.source = src['source']
+            if 'libs' in src.keys():
+                self.source = src['libs']
 
     def get_properties(self):
         """ Returns the Makefile properties as an dictionary """
@@ -55,6 +58,8 @@ class Makefile(object):
             pdc.update({"dflags":self.dflags})
         if self.pflags != "":
             pdc.update({"pflags":self.pflags})
+        if self.libs != "":
+            pdc.update({"libs":self.libs})
         pdc.update({"source":self.source})
         return pdc
 
@@ -68,23 +73,17 @@ class Makefile(object):
 
     def get_compiler_statement(self, name):
         """ Returns the compiler statement """
-        line = "$(CC) "
-        if self.cflags != "":
-            line += "$(CFLAGS) "
-        if self.pflags != "":
-            line += "$(PFLAGS) "
-        line += "-c %s" % name
+        line = "$(CC) $(CF) -c %s" % name
         if self.objpath != "":
             line += " -o %s" % self.get_obj_name(name)
         return line
 
     def get_linker_statement(self):
         """ Gets the final linker statement """
-        line = "$(CC) $(OBJ) -o $(NAME)"
-        if self.lflags != "":
-            line += " $(LFLAGS)"
-        if self.pflags != "":
-            line += " $(PFLAGS)"
+        if self.libs != "":
+            line = "$(CC) $(LF) $(OBJ) -o $(NAME) $(LIBS)"
+        else:
+            line = "$(CC) $(LF) $(OBJ) -o $(NAME)"
         return line
 
     def get_obj_name(self, fname):
@@ -111,25 +110,19 @@ class Makefile(object):
         self.lines.append(line[0:len(line)-1])
         self.lines.append("")
 
-    def add_all_target(self):
-        """ Adds the all target """
-        self.lines.append("all: $(NAME)")
-        self.lines.append("")
-
     def add_debug_target(self):
         """ Adds the debug target to the output """
-        if self.dflags != "":
-            self.lines.append("debug: CFLAGS += $(DFLAGS)")
-            self.lines.append("debug: $(NAME)")
-            self.lines.append("")
+        self.lines.append("debug: CF = -g $(DFLAGS) $(CFLAGS)")
+        self.lines.append("debug: LF = -g")
+        self.lines.append("debug: $(NAME)")
+        self.lines.append("")
 
     def add_release_target(self):
         """ Adds the release target to the output """
-        if self.dflags != "":
-            self.lines.append("release: CFLAGS += $(OFLAGS) -DNDEBUG")
-            self.lines.append("release: LFLAGS += -s")
-            self.lines.append("release: $(NAME)")
-            self.lines.append("")
+        self.lines.append("release: CF = $(CFLAGS) $(OFLAGS)")
+        self.lines.append("release: LF = -s")
+        self.lines.append("release: $(NAME)")
+        self.lines.append("")
 
     def add_clean_target(self):
         """ Adds the clean target """
@@ -195,9 +188,8 @@ class Makefile(object):
         self.add_header()
         self.add_variables()
         self.add_objects()
-        self.add_all_target()
-        self.add_debug_target()
         self.add_release_target()
+        self.add_debug_target()
         self.add_linker_statement()
         self.add_compiler_statements()
         self.add_clean_target()
