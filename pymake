@@ -3,11 +3,14 @@
 """ PyMake Makefile generator """
 
 import json
+import profiles
 from mkfile import Makefile
 from optparse import OptionParser
 
 # Parse command line arguments
 cmdLine = OptionParser()
+cmdLine.add_option("-p", "--profile", dest="profile_name", default="g++", help="Specifies the profile name")
+cmdLine.add_option("-n", "--name", dest="prog_name", default="prog", help="Sets the program name")
 cmdLine.add_option("-s", "--scan", dest="do_scan", default=False, action="store_true", help="Scan directory for input files")
 cmdLine.add_option("-r", "--recursive", dest="scan_recursive", default=False, action="store_true", help="Scan directory recursive (used together with -s)")
 options, args = cmdLine.parse_args()
@@ -19,7 +22,9 @@ try:
 except IOError:
     cfg = None
 
-make = Makefile(cfg)
+make = profiles.table[options.profile_name](cfg)
+if cfg == None:
+    make.name = options.prog_name
 if len(make.source) == 0 or options.do_scan:
     make.source = []
     make.scan(recursive=options.scan_recursive)

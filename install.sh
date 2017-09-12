@@ -13,6 +13,7 @@ if [ "$1" == "remove" ] || [ "$2" == "remove" ]; then
 else
   echo "Copying files to $INSTALL_PATH"
   cp mkfile.py $INSTALL_PATH
+  cp profiles.py $INSTALL_PATH
   cp pymake $INSTALL_PATH
   chmod +x $INSTALL_PATH/pymake
 fi
