@@ -21,6 +21,7 @@ class Makefile(object):
         self.objpath = ""
         self.name = "prog"
         self.preset = "Default GCC"
+        self.pkgconfig = ""
         if src != None:
             if 'objpath' in src.keys():
                 self.objpath = src['objpath']
@@ -42,6 +43,8 @@ class Makefile(object):
                 self.source = src['source']
             if 'libs' in src.keys():
                 self.libs = src['libs']
+            if 'pkgconfig' in src.keys():
+                self.pkgconfig = src['pkgconfig']
 
     def get_properties(self):
         """ Returns the Makefile properties as an dictionary """
@@ -60,6 +63,8 @@ class Makefile(object):
             pdc.update({"pflags":self.pflags})
         if self.libs != "":
             pdc.update({"libs":self.libs})
+        if self.pkgconfig != "":
+            pdc.update({"pkgconfig":self.pkgconfig})
         pdc.update({"source":self.source})
         return pdc
 
@@ -74,6 +79,8 @@ class Makefile(object):
     def get_compiler_statement(self, name):
         """ Returns the compiler statement """
         line = "$(CC) $(CF) -c %s" % name
+        if self.pkgconfig != "":
+            line += " `pkg-config --cflags $(PKGCFG)`"
         if self.objpath != "":
             line += " -o %s" % self.get_obj_name(name)
         return line
@@ -84,6 +91,8 @@ class Makefile(object):
             line = "$(CC) $(LF) $(OBJ) -o $(NAME) $(LIBS)"
         else:
             line = "$(CC) $(LF) $(OBJ) -o $(NAME)"
+        if self.pkgconfig != "":
+            line += " `pkg-config --libs $(PKGCFG)`"
         return line
 
     def get_obj_name(self, fname):
@@ -175,6 +184,8 @@ class Makefile(object):
             self.lines.append("OFLAGS = %s" % self.oflags)
         if self.pflags != "":
             self.lines.append("PFLAGS = %s" % self.pflags)
+        if self.pkgconfig != "":
+            self.lines.append("PKGCFG = %s" % self.pkgconfig)
         if len(self.libs) > 0:
             self.lines.append("LIBS   = %s" % self.get_libs())
         self.lines.append("")
@@ -188,11 +199,11 @@ class Makefile(object):
             for path, subdirs, files in os.walk(root):
                 for name in files:
                     fname = os.path.join(path, name)
-                    if fname.endswith(".c") or fname.endswith(".cpp"):
+                    if fname.endswith(".c") or fname.endswith(".cpp") or fname.endswith(".cc"):
                         self.source.append(fname)
         else:
             for fname in os.listdir(root):
-                if fname.endswith(".c") or fname.endswith(".cpp"):
+                if fname.endswith(".c") or fname.endswith(".cpp") or fname.endswith(".cc"):
                     self.source.append(fname)
 
     def write(self, fname):
