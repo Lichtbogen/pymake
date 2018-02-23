@@ -11,7 +11,7 @@ class Makefile(object):
         """ Reinitialize all class members """
         self.lines = []
         self.source = []
-        self.compiler = "g++"
+        self.compiler = "gcc"
         self.libs = []
         self.cflags = "-Wall"
         self.lflags = ""
@@ -125,6 +125,9 @@ class Makefile(object):
                 self.lines.append(line)
                 line = '\t'
         self.lines.append(line[0:len(line)-1])
+
+    def add_new_line(self):
+        """ Adds a simple new line to the output """
         self.lines.append("")
 
     def add_debug_target(self):
@@ -132,31 +135,26 @@ class Makefile(object):
         self.lines.append("debug: CF = -g $(DFLAGS) $(CFLAGS)")
         self.lines.append("debug: LF = -g")
         self.lines.append("debug: $(NAME)")
-        self.lines.append("")
 
     def add_release_target(self):
         """ Adds the release target to the output """
         self.lines.append("release: CF = $(CFLAGS) $(OFLAGS)")
         self.lines.append("release: LF = -s")
         self.lines.append("release: $(NAME)")
-        self.lines.append("")
 
     def add_clean_target(self):
         """ Adds the clean target """
         self.lines.append("clean:")
         self.lines.append("\trm $(OBJ)")
-        self.lines.append("")
 
     def add_phony_targets(self):
         """ Adds the phony targets to the Makefile """
         self.lines.append(".PHONY: clean")
-        self.lines.append("")
 
     def add_linker_statement(self):
         """ Adds the final linker statement to the output """
         self.lines.append("$(NAME): $(OBJ)")
         self.lines.append("\t%s" % self.get_linker_statement())
-        self.lines.append("")
 
     def add_compiler_statements(self):
         """ Adds compiler statements for all source modules """
@@ -164,14 +162,13 @@ class Makefile(object):
             obj = self.get_obj_name(src)
             self.lines.append("%s: %s" % (obj, src))
             self.lines.append("\t%s" % self.get_compiler_statement(src))
-            self.lines.append("")
 
     def add_variables(self):
         """ Adds the variable section to the output """
-        self.lines.append("")
+        self.add_new_line()
         self.lines.append("## General variables")
         self.lines.append("NAME   = %s" % self.name)
-        self.lines.append("")
+        self.add_new_line()
         self.lines.append("## Compiler and flags")
         self.lines.append("CC     = %s" % self.compiler)
         if self.cflags != "":
@@ -188,7 +185,6 @@ class Makefile(object):
             self.lines.append("PKGCFG = %s" % self.pkgconfig)
         if len(self.libs) > 0:
             self.lines.append("LIBS   = %s" % self.get_libs())
-        self.lines.append("")
 
     def __str__(self):
         return '\n'.join(self.lines)
@@ -214,11 +210,19 @@ class Makefile(object):
     def build(self):
         """ Builds the whole file structure """
         self.add_header()
+        self.add_new_line()
         self.add_variables()
+        self.add_new_line()
         self.add_objects()
+        self.add_new_line()
         self.add_release_target()
+        self.add_new_line()
         self.add_debug_target()
+        self.add_new_line()
         self.add_linker_statement()
+        self.add_new_line()
         self.add_compiler_statements()
+        self.add_new_line()
         self.add_clean_target()
+        self.add_new_line()
         self.add_phony_targets()

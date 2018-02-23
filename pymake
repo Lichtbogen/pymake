@@ -4,10 +4,10 @@
 
 import json
 import profiles
-from mkfile import Makefile
+from makefile import Makefile
 from optparse import OptionParser
 
-VERSION = "0.0.1.0"
+VERSION = "0.0.1.1"
 
 def get_version(option, opt_str, value, parser):
     print "PyMake version: %s" % VERSION
